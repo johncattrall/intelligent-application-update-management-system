@@ -15,6 +15,52 @@ The Intelligent Application Update Management System is an AWS-native solution d
 
 ![Architecture Diagram](architecture_diagram.png)
 
++-------------------+
+|  CloudWatch Logs  |
+|  (Application     |
+|   Log Groups)     |
++--------+----------+
+         |
+         | Log data
+         v
++-------------------+
+| CloudWatch Events |
+| (Scheduled rule)  |
++--------+----------+
+         |
+         | Triggers periodically
+         v
++-------------------+
+|  Lambda Function  |
++--------+----------+
+         |
+         | 1. Fetch logs
+         v
++-------------------+
+|   Log Analysis    |
+| (Pattern Matching)|
++--------+----------+
+         |
+         | 2. Detected outdated items
+         v
++-------------------+
+|  AWS Bedrock      |
+| (Claude AI Model) |
++--------+----------+
+         |
+         | 3. AI analysis and recommendations
+         v
++-------------------+
+|    SNS Topic      |
++--------+----------+
+         |
+         | 4. Notification
+         v
++-------------------+
+| Admin (Email/SMS) |
++-------------------+
+
+
 The system consists of the following components:
 
 1. CloudWatch Logs: Stores application logs
