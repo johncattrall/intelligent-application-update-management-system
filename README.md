@@ -15,6 +15,7 @@ The Intelligent Application Update Management System is an AWS-native solution d
 
 ![Architecture Diagram](architecture_diagram.png)
 
+```
 +-------------------+
 |  CloudWatch Logs  |
 |  (Application     |
@@ -59,7 +60,7 @@ The Intelligent Application Update Management System is an AWS-native solution d
 +-------------------+
 | Admin (Email/SMS) |
 +-------------------+
-
+```
 
 The system consists of the following components:
 
