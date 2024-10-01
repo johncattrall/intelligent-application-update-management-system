@@ -37,7 +37,7 @@ This introduction highlights the problem space, the key features of the solution
 
 Overview
 
-
+```
 +-------------------+
 |  CloudWatch Logs  |
 |  (Application     |
@@ -82,7 +82,7 @@ Overview
 +-------------------+
 | Admin (Email/SMS) |
 +-------------------+
-
+```
 
 Diagram Description:
 
@@ -335,7 +335,7 @@ This detailed report would be sent via SNS to the system administrator. It provi
 
 This level of detail helps the administrator understand the urgency of each update and provides actionable steps to resolve the issues, making the update process more efficient and less error-prone.
 
-
+```
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Intelligent Application Update Management System'
 
@@ -511,6 +511,7 @@ Outputs:
   SNSTopicArn:
     Description: 'ARN of the SNS Topic'
     Value: !Ref SNSTopic
+```
 
 To deploy this solution:
 
