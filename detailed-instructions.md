@@ -242,16 +242,16 @@ Sample input and output
 
 
 Sample Input (CloudWatch Log Messages):
-
+```
 2023-11-15 10:23:45 [WARN] Outdated module detected: numpy version 1.19.5 is in use, but 1.26.0 is available.
 2023-11-15 11:34:56 [ERROR] Version mismatch: Django 2.2.28 is no longer supported. Upgrade to 4.2 or higher recommended.
 2023-11-15 14:45:12 [WARN] Update required: OpenSSL 1.1.1 will reach end-of-life soon. Upgrade to OpenSSL 3.0 advised.
-
+```
 
 These log messages would be detected by our Lambda function. The function would then send these to Bedrock for analysis. Here's what the output might look like:
 
 Sample Output (Bedrock Analysis):
-
+```
 Detailed Analysis of Outdated Applications and Modules
 
 1. numpy version 1.19.5
@@ -322,7 +322,7 @@ General Recommendations:
 5. Subscribe to security mailing lists for critical components in your stack.
 
 Please review these recommendations and proceed with updates cautiously, especially in production environments. Always test thoroughly in a staging environment before applying updates to production systems.
-
+```
 
 This detailed report would be sent via SNS to the system administrator. It provides:
 
