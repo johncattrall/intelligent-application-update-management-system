@@ -13,7 +13,7 @@ The Intelligent Application Update Management System is an AWS-native solution d
 
 ## Architecture
 
-![Architecture Diagram](architecture_diagram.png)
+![Architecture Diagram]
 
 ```
 +-------------------+
