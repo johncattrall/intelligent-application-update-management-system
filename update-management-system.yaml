@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Intelligent Application Update Management System'
+
+Parameters:
+  LogGroupName:
+    Type: String
+    Description: 'Name of the CloudWatch Log Group to monitor'
+  AdminEmail:
+    Type: String
+    Description: 'Email address for receiving notifications'
+
+Resources:
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:FilterLogEvents'
+                  - 'logs:DescribeLogGroups'
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LogGroupName}:*'
+              - Effect: Allow
+                Action:
+                  - 'sns:Publish'
+                Resource: !Ref SNSTopic
+              - Effect: Allow
+                Action:
+                  - 'bedrock:InvokeModel'
+                Resource: '*'
+
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.9
+      Timeout: 300
+      MemorySize: 256
+      Environment:
+        Variables:
+          LOG_GROUP_NAME: !Ref LogGroupName
+          SNS_TOPIC_ARN: !Ref SNSTopic
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          import os
+          from datetime import datetime, timedelta
+
+          def lambda_handler(event, context):
+              logs_client = boto3.client('logs')
+              sns_client = boto3.client('sns')
+              bedrock_client = boto3.client('bedrock-runtime')
+              
+              log_group_name = os.environ['LOG_GROUP_NAME']
+              sns_topic_arn = os.environ['SNS_TOPIC_ARN']
+              time_period = 24
+              
+              start_time = int((datetime.now() - timedelta(hours=time_period)).timestamp() * 1000)
+              end_time = int(datetime.now().timestamp() * 1000)
+              
+              patterns = [
+                  'outdated module',
+                  'version mismatch',
+                  'update required'
+              ]
+              
+              outdated_items = []
+              for pattern in patterns:
+                  response = logs_client.filter_log_events(
+                      logGroupName=log_group_name,
+                      startTime=start_time,
+                      endTime=end_time,
+                      filterPattern=pattern
+                  )
+                  
+                  for event in response['events']:
+                      outdated_items.append(event['message'])
+              
+              if outdated_items:
+                  detailed_report = analyze_with_bedrock(outdated_items, bedrock_client)
+                  
+                  sns_client.publish(
+                      TopicArn=sns_topic_arn,
+                      Message=detailed_report,
+                      Subject='Outdated Modules/Applications Alert with Resolution Steps'
+                  )
+              
+              return {
+                  'statusCode': 200,
+                  'body': f'Processed {len(outdated_items)} outdated items'
+              }
+
+          def analyze_with_bedrock(items, bedrock_client):
+              prompt = f"""
+              Analyze the following log messages indicating outdated applications or modules:
+              
+              {json.dumps(items, indent=2)}
+              
+              For each item:
+              1. Confirm if it's truly outdated or if it's a false positive.
+              2. If outdated, explain why it's important to update.
+              3. Provide detailed steps to resolve the issue, including potential risks and best practices.
+              4. Suggest any additional checks or actions the admin should take.
+              
+              Format your response as a detailed report suitable for a system administrator.
+              """
+              
+              body = json.dumps({
+                  "prompt": prompt,
+                  "max_tokens_to_sample": 2000,
+                  "temperature": 0.5,
+                  "top_p": 0.9,
+              })
+              
+              response = bedrock_client.invoke_model(
+                  modelId="anthropic.claude-v2",
+                  contentType="application/json",
+                  accept="application/json",
+                  body=body
+              )
+              
+              response_body = json.loads(response.get('body').read())
+              return response_body.get('completion')
+
+  CloudWatchEvent:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: 'Schedule for running the Outdated Application Detection Lambda'
+      ScheduleExpression: 'rate(1 day)'
+      State: 'ENABLED'
+      Targets:
+        - Arn: !GetAtt LambdaFunction.Arn
+          Id: 'TargetLambdaFunction'
+
+  LambdaInvokePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: 'events.amazonaws.com'
+      SourceArn: !GetAtt CloudWatchEvent.Arn
+
+  SNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      DisplayName: 'Outdated Application Alerts'
+
+  SNSSubscription:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      TopicArn: !Ref SNSTopic
+      Protocol: 'email'
+      Endpoint: !Ref AdminEmail
+
+Outputs:
+  LambdaFunctionArn:
+    Description: 'ARN of the Lambda Function'
+    Value: !GetAtt LambdaFunction.Arn
+  SNSTopicArn:
+    Description: 'ARN of the SNS Topic'
+    Value: !Ref SNSTopic
