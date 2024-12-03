@@ -7,7 +7,7 @@ The Intelligent Application Update Management System is an AWS-native solution d
 ## Key Features
 
 - Automated detection of outdated software through CloudWatch log analysis
-- Intelligent analysis using AWS Bedrock's Claude model
+- Intelligent analysis using Amazon Bedrock's Claude model
 - Detailed, actionable reports delivered via email
 - Easily deployable through AWS CloudFormation
 
@@ -43,7 +43,7 @@ The Intelligent Application Update Management System is an AWS-native solution d
          | 2. Detected outdated items
          v
 +-------------------+
-|  AWS Bedrock      |
+|  Amazon Bedrock   |
 | (Claude AI Model) |
 +--------+----------+
          |
@@ -65,13 +65,13 @@ The system consists of the following components:
 1. CloudWatch Logs: Stores application logs
 2. CloudWatch Events: Triggers the Lambda function on a schedule
 3. Lambda Function: Analyzes logs and interacts with Bedrock
-4. AWS Bedrock (Claude model): Provides intelligent analysis of detected issues
+4. Amazon Bedrock (Claude model): Provides intelligent analysis of detected issues
 5. SNS Topic: Delivers notifications to administrators
 
 ## Prerequisites
 
 - An AWS account with access to CloudFormation, Lambda, CloudWatch, SNS, and Bedrock
-- AWS Bedrock enabled in your account with access to the Claude model
+- Amazon Bedrock enabled in your account with access to the Claude model
 - A CloudWatch Log Group containing application logs to be analyzed
 
 ## Deployment
@@ -121,7 +121,7 @@ This solution uses several AWS services that may incur costs:
 - AWS Lambda invocations and execution time
 - CloudWatch Logs storage and data scanning
 - SNS message publications
-- AWS Bedrock API calls
+- Amazon Bedrock API calls
 
 Monitor your AWS billing dashboard to track associated costs.
 
@@ -129,11 +129,11 @@ Monitor your AWS billing dashboard to track associated costs.
 
 - Check CloudWatch Logs for the Lambda function to diagnose any issues
 - Ensure that the provided Log Group exists and contains the expected log patterns
-- Verify that AWS Bedrock is enabled and accessible in your account
+- Verify that Amazon Bedrock is enabled and accessible in your account
 
 ## Contributing
 
-We welcome contributions to improve the Intelligent Application Update Management System. Please submit pull requests or open issues to suggest enhancements or report bugs.
+I welcome contributions to improve the Intelligent Application Update Management System. Please submit pull requests or open issues to suggest enhancements or report bugs.
 
 ## License
 
@@ -147,6 +147,6 @@ For more information on AWS services used in this project, refer to the official
 - [AWS Lambda](https://docs.aws.amazon.com/lambda/)
 - [Amazon CloudWatch](https://docs.aws.amazon.com/cloudwatch/)
 - [Amazon SNS](https://docs.aws.amazon.com/sns/)
-- [AWS Bedrock](https://docs.aws.amazon.com/bedrock/)
+- [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)
 
 For questions or support, please open an issue in this repository.
